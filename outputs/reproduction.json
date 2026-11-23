@@ -1,0 +1,30 @@
+{
+ "what": "clean-room rerun of the test split from MP3_source_v3.zip + MP3_adapter_v3.zip and a freshly extracted, hash-verified official package, following REPRODUCE.md",
+ "python": "3.11.18",
+ "sqlite": "3.53.1",
+ "result": {
+  "correct": 192,
+  "n": 240,
+  "accuracy": 80.0,
+  "manifest_sha256": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc",
+  "bank_sha256": "598b1a072a47cdcf7308dc5646ae2bffd356390ab8df533510b69f2c884d712c",
+  "references_sha256": "8be5f2746ee324d6b4b880dd84a2f8de56fa540af08e93842c0476adec581506",
+  "scorer_sha256": "87870af26173fbe6d8994e4de179fb272ef1fadf7dcaafc2e7b4c814c61ec95b",
+  "executor_sha256": "4ecc3839728d68bd83f0d2a52cdd8392fd76dbaec3e54a19422118dee587b471"
+ },
+ "submitted_result": {
+  "correct": 192,
+  "n": 240,
+  "accuracy": 80.0,
+  "manifest_sha256": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc",
+  "bank_sha256": "598b1a072a47cdcf7308dc5646ae2bffd356390ab8df533510b69f2c884d712c",
+  "references_sha256": "8be5f2746ee324d6b4b880dd84a2f8de56fa540af08e93842c0476adec581506",
+  "scorer_sha256": "87870af26173fbe6d8994e4de179fb272ef1fadf7dcaafc2e7b4c814c61ec95b",
+  "executor_sha256": "4ecc3839728d68bd83f0d2a52cdd8392fd76dbaec3e54a19422118dee587b471"
+ },
+ "predictions_identical_except_timing": true,
+ "per_question_outcomes_identical": true,
+ "llm_completions": 65,
+ "prediction_wall_s": 278,
+ "scoring_wall_s": 7
+}
