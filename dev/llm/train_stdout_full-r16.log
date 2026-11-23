@@ -1,0 +1,7 @@
+trainable params: 10,092,544 || all params: 606,142,464 || trainable%: 1.6650
+examples=1143 mean_tokens=396
+epoch 1 loss=0.2951 steps=143 elapsed=832s
+epoch 2 loss=0.0607 steps=286 elapsed=2468s
+epoch 3 loss=0.0148 steps=429 elapsed=4095s
+saved /home/wyatt/mp3/work/llm/adapters/full-r16
+exit=0

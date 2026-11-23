@@ -1,0 +1,32 @@
+{
+ "purpose": "SFT data for the optional Qwen/Qwen3-0.6B LoRA SQL repair proposer (DASE7506 MP3, L line)",
+ "scope": "discovery",
+ "training_targets": "gold_sql of TRAIN tasks whose database is in dev/split.json 'discovery' (train_memory.jsonl)",
+ "training_inputs": "question, official schema, candidate SQL (original draft, candidates checked by run 'v2-nollm' (v2 with the LLM switched off) on train, cached repair hints) and its public-database feedback, public example",
+ "not_used_for_training": [
+  "validation split (prompts only, checkpoint selection)",
+  "train holdout schemas (prompts only, gate estimate)",
+  "test split (never read)"
+ ],
+ "external_data": "none; no external LLM generated any training data",
+ "source_sha256": {
+  "train.jsonl": "562d6d54cbfac83829cf528a3b8ca5f101994c9fe5b1a502519beba328900f65",
+  "train_memory.jsonl": "25dced1001defe1d96b87e67eb007a106a3b96ac57d0bd76988a0ee63ee563d2",
+  "repair_hints.json": "cedf7056f9248bc6296ee80bc03e2a7744c119111f640d8596ea195c5d1e6b03",
+  "public_results.json": "1dba955aab6ef8f6cbe4f05bad697f513929400f262afbc1bd6bd4f37efba8c2",
+  "manifest.json": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc"
+ },
+ "run_predictions_sha256": "83d9751e2e3d51fdd55f95ef78cde1d6910bb300e647acedee4ac7ab3c160ba9",
+ "split_sha256": "ed17febef51f345aeba8db50af61b8b29153cd565104b6e3d223b2abc232f37f",
+ "prompt_code_sha256": "95197f1ed1df7fca3bc422d4d9a801e81b26034565e3f59b24c03288e9045135",
+ "counts": {
+  "train_discovery_examples": 695,
+  "train_discovery_tasks": 292,
+  "holdout_prompts": 188,
+  "validation_prompts": 120
+ },
+ "output_sha256": {
+  "train_discovery.jsonl": "031305ec6905d2d181adcc3c7a5773534b540ba93f433ca685f5b009abe5600d",
+  "validation_prompts.jsonl": "e720c662eeff88cba5ba27ae0c8ba971060485ba02d5b126774aaad93377d555"
+ }
+}

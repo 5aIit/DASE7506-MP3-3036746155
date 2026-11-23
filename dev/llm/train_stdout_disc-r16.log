@@ -1,0 +1,7 @@
+trainable params: 10,092,544 || all params: 606,142,464 || trainable%: 1.6650
+examples=695 mean_tokens=392
+epoch 1 loss=0.3387 steps=87 elapsed=232s
+epoch 2 loss=0.0697 steps=174 elapsed=1070s
+epoch 3 loss=0.0232 steps=261 elapsed=2039s
+saved /home/wyatt/mp3/work/llm/adapters/disc-r16
+exit=0
