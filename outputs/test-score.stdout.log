@@ -1,9 +1,9 @@
 {
   "protocol": "dase7506-sql-repair-v1",
   "n": 240,
-  "correct": 192,
-  "accuracy": 80.0,
-  "mean_tool_calls": 4.029166666666667,
+  "correct": 198,
+  "accuracy": 82.5,
+  "mean_tool_calls": 4.054166666666666,
   "split": "test",
   "benchmark": "spider-sql-repair-public-evaluation-v3",
   "manifest_sha256": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc",
@@ -11,6 +11,6 @@
   "references_sha256": "8be5f2746ee324d6b4b880dd84a2f8de56fa540af08e93842c0476adec581506",
   "scorer_sha256": "87870af26173fbe6d8994e4de179fb272ef1fadf7dcaafc2e7b4c814c61ec95b",
   "executor_sha256": "4ecc3839728d68bd83f0d2a52cdd8392fd76dbaec3e54a19422118dee587b471",
-  "predictions_sha256": "b9ebe39f84852ae24e11b8e2660ee886c4064101840e14e3b5368596c433fd01",
-  "scoring_seconds": 6.740085546989576
+  "predictions_sha256": "f0c190d8bb07be680f2a7d6cf3508ab76b55123f3c5ac72759e09680835ae354",
+  "scoring_seconds": 6.430617125000026
 }

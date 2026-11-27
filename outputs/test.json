@@ -1111,6 +1111,22 @@
         },
         {
           "tool": "check",
+          "sql": "SELECT T1.Package_Option FROM TV_Channel AS T1 EXCEPT SELECT tv_channel.Package_Option FROM TV_Channel AS tv_channel WHERE TV_Channel.id IN (SELECT DISTINCT Cartoons.Channel FROM Cartoon WHERE Cartoon.Directed_by = 'Ben Jones')",
+          "observation": {
+            "ok": false,
+            "columns": [],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": {
+              "type": "OperationalError",
+              "message": "no such column: Cartoons.Channel"
+            },
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
           "sql": "SELECT \"TV_Channel\".\"Package_Option\" FROM \"TV_Channel\" EXCEPT SELECT \"TV_Channel\".\"Package_Option\" FROM \"TV_Channel\" JOIN \"Cartoon\" ON \"TV_Channel\".\"id\" = \"Cartoon\".\"Channel\"",
           "observation": {
             "ok": true,
@@ -1140,22 +1156,6 @@
             "error": {
               "type": "OperationalError",
               "message": "no such column: Channel"
-            },
-            "matches_example": false
-          }
-        },
-        {
-          "tool": "check",
-          "sql": "SELECT DISTINCT TV_Channel.Package_Option FROM TV_Channel WHERE NOT TV_Channel.id IN (SELECT DISTINCT Cartoons.Channel FROM Cartoon WHERE Cartoon.Directed_by COLLATE NOCASE = 'Ben Jones')",
-          "observation": {
-            "ok": false,
-            "columns": [],
-            "rows": [],
-            "row_count": 0,
-            "truncated": false,
-            "error": {
-              "type": "OperationalError",
-              "message": "no such column: Cartoons.Channel"
             },
             "matches_example": false
           }
@@ -2069,7 +2069,7 @@
     },
     {
       "id": "test-a2d3c742e0bdffaf",
-      "sql": "SELECT DISTINCT orchestra.Year_of_Founded\nFROM orchestra\nJOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID\nJOIN show ON performance.Performance_ID = show.Performance_ID\nGROUP BY orchestra.Orchestra_ID\nHAVING COUNT(DISTINCT show.Show_ID) > 1;",
+      "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID JOIN show ON performance.Performance_ID = show.Performance_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(DISTINCT show.Show_ID) > 1",
       "trace": [
         {
           "tool": "check",
@@ -2311,15 +2311,30 @@
           ]
         },
         {
+          "tool": "check",
+          "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID JOIN show ON performance.Performance_ID = show.Performance_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(DISTINCT show.Show_ID) > 1",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Year_of_Founded"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT orchestra.Year_of_Founded\nFROM orchestra\nJOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID\nJOIN show ON performance.Performance_ID = show.Performance_ID\nGROUP BY orchestra.Orchestra_ID\nHAVING COUNT(DISTINCT show.Show_ID) > 1;"
+          "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID JOIN show ON performance.Performance_ID = show.Performance_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(DISTINCT show.Show_ID) > 1"
         }
       ],
-      "tool_calls": 5
+      "tool_calls": 6
     },
     {
       "id": "test-858439935458b795",
-      "sql": "SELECT T1.first_name , T1.middle_name , T1.last_name , T1.student_id , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1",
+      "sql": "SELECT T1.student_id , T1.first_name , T1.middle_name , T1.last_name , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1",
       "trace": [
         {
           "tool": "check",
@@ -2873,14 +2888,14 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT T1.first_name , T1.middle_name , T1.last_name , T1.student_id , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1",
+          "sql": "SELECT T1.student_id , T1.first_name , T1.middle_name , T1.last_name , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1",
           "observation": {
             "ok": true,
             "columns": [
+              "student_id",
               "first_name",
               "middle_name",
               "last_name",
-              "student_id",
               "count(*)",
               "student_id"
             ],
@@ -2893,7 +2908,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT T1.first_name , T1.middle_name , T1.last_name , T1.student_id , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1"
+          "sql": "SELECT T1.student_id , T1.first_name , T1.middle_name , T1.last_name , count(*) , T1.student_id FROM STUDENTS AS T1 JOIN STUDENT_ENROLMENT AS T2 ON T1.student_id = T2.student_id GROUP BY T1.student_id ORDER BY count(*) DESC LIMIT 1"
         }
       ],
       "tool_calls": 7
@@ -3697,7 +3712,7 @@
     },
     {
       "id": "test-3c78700b4d9bbb59",
-      "sql": "SELECT DISTINCT s.Name\nFROM singer s\nJOIN song sg ON s.Singer_ID = sg.Singer_ID\nGROUP BY s.Singer_ID\nHAVING COUNT(sg.Song_ID) > 1;",
+      "sql": "SELECT s.Name FROM singer AS s JOIN song AS sg ON s.Singer_ID = sg.Singer_ID GROUP BY s.Singer_ID HAVING COUNT(sg.Song_ID) > 1",
       "trace": [
         {
           "tool": "check",
@@ -3822,11 +3837,26 @@
           ]
         },
         {
+          "tool": "check",
+          "sql": "SELECT s.Name FROM singer AS s JOIN song AS sg ON s.Singer_ID = sg.Singer_ID GROUP BY s.Singer_ID HAVING COUNT(sg.Song_ID) > 1",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Name"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT s.Name\nFROM singer s\nJOIN song sg ON s.Singer_ID = sg.Singer_ID\nGROUP BY s.Singer_ID\nHAVING COUNT(sg.Song_ID) > 1;"
+          "sql": "SELECT s.Name FROM singer AS s JOIN song AS sg ON s.Singer_ID = sg.Singer_ID GROUP BY s.Singer_ID HAVING COUNT(sg.Song_ID) > 1"
         }
       ],
-      "tool_calls": 4
+      "tool_calls": 5
     },
     {
       "id": "test-b496cf1fb5c3bbcc",
@@ -10587,7 +10617,7 @@
     },
     {
       "id": "test-b3584cf86bfa038d",
-      "sql": "SELECT T1.property_name FROM properties AS T1 JOIN properties AS T2 ON T1.property_type_code = T2.property_type_code WHERE T1.room_count > 1 AND T2.property_type_code = 'Apartment'",
+      "sql": "SELECT T1.property_name FROM properties AS T1 JOIN ref_property_types AS T2 ON T1.property_type_code = T2.property_type_code WHERE \"T1\".\"property_type_code\" = 'House' OR T2.property_type_code = 'apartment' AND T1.room_count > 1",
       "trace": [
         {
           "tool": "check",
@@ -10952,7 +10982,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN properties AS T2 ON T1.property_type_code = T2.property_type_code WHERE T1.room_count > 1 AND T2.property_type_code = 'apartment'",
+          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN ref_property_types AS T2 ON T1.property_type_code = T2.property_type_code WHERE T2.property_type_code = 'house' OR T2.property_type_code = 'apartment' AND T1.room_count > 1",
           "observation": {
             "ok": true,
             "columns": [
@@ -10967,7 +10997,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN properties AS T2 ON T1.property_type_code = T2.property_type_code WHERE T1.room_count > 1 AND T2.property_type_code = 'Apartment'",
+          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN ref_property_types AS T2 ON T1.property_type_code = T2.property_type_code WHERE \"T1\".\"property_type_code\" = 'House' OR T2.property_type_code = 'apartment' AND T1.room_count > 1",
           "observation": {
             "ok": true,
             "columns": [
@@ -10975,10 +11005,13 @@
             ],
             "rows": [
               [
-                "ten tower"
+                "park"
+              ],
+              [
+                "the cole"
               ]
             ],
-            "row_count": 1,
+            "row_count": 2,
             "truncated": false,
             "error": null,
             "matches_example": false
@@ -10986,7 +11019,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN properties AS T2 ON T1.property_type_code = T2.property_type_code WHERE T1.room_count > 1 AND T2.property_type_code = 'Apartment'"
+          "sql": "SELECT T1.property_name FROM properties AS T1 JOIN ref_property_types AS T2 ON T1.property_type_code = T2.property_type_code WHERE \"T1\".\"property_type_code\" = 'House' OR T2.property_type_code = 'apartment' AND T1.room_count > 1"
         }
       ],
       "tool_calls": 8
@@ -11809,18 +11842,18 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT TREATMENTS.dog_id , TREATMENTS.professional_id , TREATMENTS.treatment_type_code , DATE_OF_TREATMENT , COST_OF_TREATMENT FROM Treatments JOIN Dogs ON Treatments.dog_id = Dogs.dog_id JOIN Professionals ON Treatments.professional_id = Professionals.professional_id ORDER BY age ASC LIMIT 1",
+          "sql": "SELECT T1.last_name FROM owners AS T1 JOIN dogs AS T2 ON T1.owner_id = T2.owner_id ORDER BY age ASC LIMIT 1",
           "observation": {
             "ok": true,
             "columns": [
-              "dog_id",
-              "professional_id",
-              "treatment_type_code",
-              "date_of_treatment",
-              "cost_of_treatment"
+              "last_name"
             ],
-            "rows": [],
-            "row_count": 0,
+            "rows": [
+              [
+                "Funk"
+              ]
+            ],
+            "row_count": 1,
             "truncated": false,
             "error": null,
             "matches_example": false
@@ -12671,7 +12704,7 @@
     },
     {
       "id": "test-a9601bc8da0bfa57",
-      "sql": "SELECT name FROM highschooler WHERE id NOT IN (SELECT student_id FROM friend)",
+      "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id",
       "trace": [
         {
           "tool": "check",
@@ -12815,7 +12848,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT name FROM highschooler WHERE id NOT IN (SELECT student_id FROM friend)",
+          "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id",
           "observation": {
             "ok": true,
             "columns": [
@@ -12823,19 +12856,19 @@
             ],
             "rows": [
               [
-                "Tiffany"
-              ],
-              [
-                "Kris"
-              ],
-              [
                 "Gabriel"
               ],
               [
                 "Jordan"
               ],
               [
+                "Kris"
+              ],
+              [
                 "Logan"
+              ],
+              [
+                "Tiffany"
               ]
             ],
             "row_count": 5,
@@ -12846,7 +12879,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT name FROM highschooler WHERE id NOT IN (SELECT student_id FROM friend)"
+          "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id"
         }
       ],
       "tool_calls": 5
@@ -13671,7 +13704,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT T1.area_code FROM AREA_CODE_STATE AS T1 JOIN VOTES AS T2 ON T1.state = T2.state GROUP BY T1.state ORDER BY count(*) DESC LIMIT 1",
+          "sql": "SELECT area_code FROM area_code_state GROUP BY state ORDER BY count(*) DESC LIMIT 1",
           "observation": {
             "ok": true,
             "columns": [
@@ -13679,7 +13712,7 @@
             ],
             "rows": [
               [
-                213
+                210
               ]
             ],
             "row_count": 1,
@@ -16027,7 +16060,7 @@
     },
     {
       "id": "test-3cc4ebb971dc3959",
-      "sql": "SELECT DISTINCT student.name\nFROM Highschooler student\nJOIN Friend ON student.ID = Friend.student_id\nWHERE student.grade > 5\nGROUP BY student.ID\nHAVING COUNT(Friend.friend_id) >= 2;",
+      "sql": "SELECT student.name FROM Highschooler AS student JOIN Friend ON student.ID = Friend.student_id WHERE student.grade > 5 GROUP BY student.ID HAVING COUNT(Friend.friend_id) >= 2",
       "trace": [
         {
           "tool": "check",
@@ -16157,15 +16190,30 @@
           ]
         },
         {
+          "tool": "check",
+          "sql": "SELECT student.name FROM Highschooler AS student JOIN Friend ON student.ID = Friend.student_id WHERE student.grade > 5 GROUP BY student.ID HAVING COUNT(Friend.friend_id) >= 2",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "name"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT student.name\nFROM Highschooler student\nJOIN Friend ON student.ID = Friend.student_id\nWHERE student.grade > 5\nGROUP BY student.ID\nHAVING COUNT(Friend.friend_id) >= 2;"
+          "sql": "SELECT student.name FROM Highschooler AS student JOIN Friend ON student.ID = Friend.student_id WHERE student.grade > 5 GROUP BY student.ID HAVING COUNT(Friend.friend_id) >= 2"
         }
       ],
-      "tool_calls": 4
+      "tool_calls": 5
     },
     {
       "id": "test-6d9b9770e909b3bc",
-      "sql": "SELECT DISTINCT visitor.Name, visitor.Age FROM visitor JOIN visit ON visitor.ID = visit.visitor_ID WHERE visit.Num_of_Ticket = (SELECT MAX(Num_of_Ticket) FROM visit) ORDER BY visit.Num_of_Ticket DESC",
+      "sql": "SELECT visitor.Name, visitor.Age\nFROM visitor\nJOIN visit ON visitor.ID = visit.visitor_ID\nWHERE visit.Num_of_Ticket = (\n    SELECT MAX(Num_of_Ticket)\n    FROM visit\n)\nORDER BY visit.Num_of_Ticket DESC;",
       "trace": [
         {
           "tool": "check",
@@ -16236,7 +16284,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT visitor.Name, visitor.Age FROM visitor JOIN visit ON visitor.ID = visit.visitor_ID WHERE visit.Num_of_Ticket = (SELECT MAX(Num_of_Ticket) FROM visit) ORDER BY visit.Num_of_Ticket DESC"
+          "sql": "SELECT visitor.Name, visitor.Age\nFROM visitor\nJOIN visit ON visitor.ID = visit.visitor_ID\nWHERE visit.Num_of_Ticket = (\n    SELECT MAX(Num_of_Ticket)\n    FROM visit\n)\nORDER BY visit.Num_of_Ticket DESC;"
         }
       ],
       "tool_calls": 4
@@ -17226,7 +17274,7 @@
     },
     {
       "id": "test-a1bfbc487dc9c888",
-      "sql": "SELECT DISTINCT airlines.Airline\nFROM airlines\nJOIN flights ON airlines.Airline = flights.Airline\nWHERE flights.SourceAirport IN ('APG', 'CVO')\nGROUP BY airlines.Airline\nHAVING COUNT(DISTINCT flights.SourceAirport) = 2;",
+      "sql": "SELECT airlines.Airline FROM airlines JOIN flights ON airlines.Airline = flights.Airline WHERE flights.SourceAirport IN ('APG', 'CVO') GROUP BY airlines.Airline HAVING COUNT(DISTINCT flights.SourceAirport) = 2",
       "trace": [
         {
           "tool": "check",
@@ -17396,11 +17444,26 @@
           }
         },
         {
+          "tool": "check",
+          "sql": "SELECT airlines.Airline FROM airlines JOIN flights ON airlines.Airline = flights.Airline WHERE flights.SourceAirport IN ('APG', 'CVO') GROUP BY airlines.Airline HAVING COUNT(DISTINCT flights.SourceAirport) = 2",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Airline"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT airlines.Airline\nFROM airlines\nJOIN flights ON airlines.Airline = flights.Airline\nWHERE flights.SourceAirport IN ('APG', 'CVO')\nGROUP BY airlines.Airline\nHAVING COUNT(DISTINCT flights.SourceAirport) = 2;"
+          "sql": "SELECT airlines.Airline FROM airlines JOIN flights ON airlines.Airline = flights.Airline WHERE flights.SourceAirport IN ('APG', 'CVO') GROUP BY airlines.Airline HAVING COUNT(DISTINCT flights.SourceAirport) = 2"
         }
       ],
-      "tool_calls": 5
+      "tool_calls": 6
     },
     {
       "id": "test-d7824905d10995a3",
@@ -17689,7 +17752,7 @@
     },
     {
       "id": "test-9d598f905573b7de",
-      "sql": "SELECT DISTINCT orchestra.Year_of_Founded\nFROM orchestra\nJOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID\nGROUP BY orchestra.Orchestra_ID\nHAVING COUNT(performance.Performance_ID) > 1;",
+      "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(performance.Performance_ID) > 1",
       "trace": [
         {
           "tool": "check",
@@ -17916,11 +17979,26 @@
           ]
         },
         {
+          "tool": "check",
+          "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(performance.Performance_ID) > 1",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Year_of_Founded"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT orchestra.Year_of_Founded\nFROM orchestra\nJOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID\nGROUP BY orchestra.Orchestra_ID\nHAVING COUNT(performance.Performance_ID) > 1;"
+          "sql": "SELECT orchestra.Year_of_Founded FROM orchestra JOIN performance ON orchestra.Orchestra_ID = performance.Orchestra_ID GROUP BY orchestra.Orchestra_ID HAVING COUNT(performance.Performance_ID) > 1"
         }
       ],
-      "tool_calls": 4
+      "tool_calls": 5
     },
     {
       "id": "test-0d2e18c35ed71bd6",
@@ -19635,7 +19713,7 @@
     },
     {
       "id": "test-17452a7f98a02c84",
-      "sql": "SELECT Has_Pet.StuID\nFROM Has_Pet\nJOIN Pets ON Has_Pet.PetID = Pets.PetID\nWHERE Pets.PetType = 'cat';",
+      "sql": "SELECT StuID FROM Student EXCEPT SELECT StuID FROM Has_Pet WHERE PetID IN (SELECT PetID FROM Pets WHERE PetType = 'cat')",
       "trace": [
         {
           "tool": "check",
@@ -19858,13 +19936,16 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT \"Student\".\"StuID\" FROM \"Student\" WHERE NOT \"Student\".\"StuID\" IN (SELECT \"Has_Pet\".\"StuID\" FROM \"Has_Pet\")",
+          "sql": "SELECT StuID FROM Student EXCEPT SELECT StuID FROM Has_Pet WHERE PetID IN (SELECT PetID FROM Pets WHERE PetType = 'cat')",
           "observation": {
             "ok": true,
             "columns": [
               "StuID"
             ],
             "rows": [
+              [
+                1002
+              ],
               [
                 1008
               ],
@@ -19885,38 +19966,20 @@
               ],
               [
                 1023
-              ],
-              [
-                1026
               ]
             ],
-            "row_count": 11,
+            "row_count": 12,
             "truncated": true,
             "error": null,
-            "matches_example": false
-          }
-        },
-        {
-          "tool": "check",
-          "sql": "SELECT \"Has_Pet\".\"StuID\" FROM \"Has_Pet\" JOIN \"Pets\" ON \"Has_Pet\".\"PetID\" = \"Pets\".\"PetID\" WHERE \"Pets\".\"PetType\" = 'cat'",
-          "observation": {
-            "ok": true,
-            "columns": [
-              "StuID"
-            ],
-            "rows": [],
-            "row_count": 0,
-            "truncated": false,
-            "error": null,
-            "matches_example": false
+            "matches_example": true
           }
         },
         {
           "tool": "submit",
-          "sql": "SELECT Has_Pet.StuID\nFROM Has_Pet\nJOIN Pets ON Has_Pet.PetID = Pets.PetID\nWHERE Pets.PetType = 'cat';"
+          "sql": "SELECT StuID FROM Student EXCEPT SELECT StuID FROM Has_Pet WHERE PetID IN (SELECT PetID FROM Pets WHERE PetType = 'cat')"
         }
       ],
-      "tool_calls": 8
+      "tool_calls": 7
     },
     {
       "id": "test-7b72d162c5630bd4",
@@ -21432,7 +21495,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT count(*) FROM car_makers AS t1 JOIN car_names AS t2 ON t1.id = t2.make WHERE t1.country = 'USA'",
+          "sql": "SELECT count(*) FROM countries AS t1 JOIN car_makers AS t2 ON t1.countryid = t2.country WHERE t1.countryname = 'USA'",
           "observation": {
             "ok": true,
             "columns": [
@@ -21451,7 +21514,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT COUNT(*) FROM car_makers AS t1 JOIN \"model_list\" AS \"_repair_fk_1\" ON \"t1\".\"Id\" = \"_repair_fk_1\".\"Maker\" JOIN car_names AS t2 ON \"_repair_fk_1\".\"Model\" = \"t2\".\"Model\" WHERE t1.country = 'USA'",
+          "sql": "SELECT COUNT(*) FROM car_names JOIN \"model_list\" AS \"_repair_fk_1\" ON \"car_names\".\"Model\" = \"_repair_fk_1\".\"Model\" JOIN car_makers ON \"_repair_fk_1\".\"Maker\" = \"car_makers\".\"Id\" JOIN countries ON car_makers.Country = countries.CountryId WHERE countries.CountryName = 'USA'",
           "observation": {
             "ok": true,
             "columns": [
@@ -21477,7 +21540,7 @@
     },
     {
       "id": "test-27f72c8c1d60b54c",
-      "sql": "SELECT count(*) FROM contestants WHERE contestant_number NOT IN (SELECT contestant_number FROM votes)",
+      "sql": "SELECT COUNT(*) AS contestants_not_voted\nFROM VOTES\nWHERE contestant_number IS NULL;",
       "trace": [
         {
           "tool": "check",
@@ -21654,7 +21717,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT count(*) FROM contestants WHERE contestant_number NOT IN (SELECT contestant_number FROM votes)",
+          "sql": "SELECT count(*) FROM VOTES AS t1 JOIN CONTESTANTS AS t2 ON t1.contestant_number = t2.contestant_number WHERE t2.contestant_number NOT IN (SELECT contestant_number FROM VOTES)",
           "observation": {
             "ok": true,
             "columns": [
@@ -21662,21 +21725,40 @@
             ],
             "rows": [
               [
-                5
+                0
               ]
             ],
             "row_count": 1,
             "truncated": false,
             "error": null,
-            "matches_example": true
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
+          "sql": "SELECT count(*) FROM VOTES AS t1 JOIN CONTESTANTS AS t2 ON t1.contestant_number = t2.contestant_number EXCEPT SELECT contestant_number FROM VOTES",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "count(*)"
+            ],
+            "rows": [
+              [
+                2
+              ]
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "error": null,
+            "matches_example": false
           }
         },
         {
           "tool": "submit",
-          "sql": "SELECT count(*) FROM contestants WHERE contestant_number NOT IN (SELECT contestant_number FROM votes)"
+          "sql": "SELECT COUNT(*) AS contestants_not_voted\nFROM VOTES\nWHERE contestant_number IS NULL;"
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "test-516f6b296a76f1d9",
@@ -22659,7 +22741,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT T1.name FROM dogs AS T1 JOIN treatments AS T2 ON T1.dog_id = T2.dog_id WHERE T2.cost_of_treatment > 1000",
+          "sql": "SELECT T1.name FROM Dogs AS T1 JOIN Treatments AS T2 ON T1.dog_id = T2.dog_id WHERE T2.cost_of_treatment > 1000",
           "observation": {
             "ok": true,
             "columns": [
@@ -24134,6 +24216,27 @@
         },
         {
           "tool": "check",
+          "sql": "SELECT T1.id , T1.name FROM ship AS T1 JOIN death AS T2 ON T1.id = T2.caused_by_ship_id GROUP BY T2.caused_by_ship_id ORDER BY sum(T2.injured) DESC LIMIT 1",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "id",
+              "name"
+            ],
+            "rows": [
+              [
+                4,
+                "HMS Avon"
+              ]
+            ],
+            "row_count": 1,
+            "truncated": false,
+            "error": null,
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
           "sql": "SELECT T1.id , T1.name FROM ship AS T1 JOIN death AS T2 ON T1.id = T2.caused_by_ship_id GROUP BY T1.id ORDER BY sum(T2.injured) DESC LIMIT 1",
           "observation": {
             "ok": true,
@@ -24158,7 +24261,7 @@
           "sql": "SELECT ship.id, name\nFROM ship\nJOIN death ON ship.id = death.caused_by_ship_id\nWHERE death.injured > 0\nORDER BY death.injured DESC\nLIMIT 1;"
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "test-fa4dc0e1192a9f98",
@@ -24388,7 +24491,7 @@
     },
     {
       "id": "test-7574831b0d7f970e",
-      "sql": "SELECT H.name\nFROM Highschooler H\nWHERE H.ID NOT IN (\n    SELECT DISTINCT F.friend_id\n    FROM Friend F\n);",
+      "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id",
       "trace": [
         {
           "tool": "check",
@@ -24562,11 +24665,73 @@
           ]
         },
         {
+          "tool": "check",
+          "sql": "SELECT T1.name FROM Highschooler AS T1 EXCEPT SELECT h.name FROM Highschooler AS h WHERE H.ID IN (SELECT DISTINCT F.friend_id FROM Friend AS F)",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "name"
+            ],
+            "rows": [
+              [
+                "Alexis"
+              ],
+              [
+                "Jordan"
+              ],
+              [
+                "Kris"
+              ],
+              [
+                "Logan"
+              ],
+              [
+                "Tiffany"
+              ]
+            ],
+            "row_count": 5,
+            "truncated": false,
+            "error": null,
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
+          "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "name"
+            ],
+            "rows": [
+              [
+                "Gabriel"
+              ],
+              [
+                "Jordan"
+              ],
+              [
+                "Kris"
+              ],
+              [
+                "Logan"
+              ],
+              [
+                "Tiffany"
+              ]
+            ],
+            "row_count": 5,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT H.name\nFROM Highschooler H\nWHERE H.ID NOT IN (\n    SELECT DISTINCT F.friend_id\n    FROM Friend F\n);"
+          "sql": "SELECT name FROM highschooler EXCEPT SELECT T1.name FROM highschooler AS T1 JOIN friend AS T2 ON T1.id = T2.student_id"
         }
       ],
-      "tool_calls": 5
+      "tool_calls": 7
     },
     {
       "id": "test-941726a706caeec2",
@@ -25133,7 +25298,7 @@
     },
     {
       "id": "test-0fd3e79c9503cfda",
-      "sql": "SELECT DISTINCT TV_Channel.Country\nFROM TV_Channel\nJOIN Cartoon ON TV_Channel.id = Cartoon.Channel\nWHERE Cartoon.Written_by != 'Todd Casey';",
+      "sql": "SELECT T1.Country FROM TV_Channel AS T1 EXCEPT SELECT T1.Country FROM TV_Channel AS T1 JOIN Cartoon AS T2 ON T1.id = T2.Channel WHERE T2.Written_by = 'Todd Casey'",
       "trace": [
         {
           "tool": "check",
@@ -25383,64 +25548,33 @@
           ]
         },
         {
-          "tool": "execute",
-          "sql": "/* value-grounding */ SELECT table_name, column_name, value FROM (SELECT 'Cartoon' AS table_name, 'Written_by' AS column_name, CAST(\"Cartoon\".\"Written_by\" AS TEXT) AS value FROM \"Cartoon\" WHERE \"Cartoon\".\"Written_by\" IS NOT NULL AND (INSTR(LOWER(CAST(\"Cartoon\".\"Written_by\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"Cartoon\".\"Written_by\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"Cartoon\".\"Written_by\" AS TEXT))) > 0)) GROUP BY \"Cartoon\".\"Written_by\" UNION ALL SELECT 'Cartoon' AS table_name, 'Title' AS column_name, CAST(\"Cartoon\".\"Title\" AS TEXT) AS value FROM \"Cartoon\" WHERE \"Cartoon\".\"Title\" IS NOT NULL AND (INSTR(LOWER(CAST(\"Cartoon\".\"Title\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"Cartoon\".\"Title\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"Cartoon\".\"Title\" AS TEXT))) > 0)) GROUP BY \"Cartoon\".\"Title\" UNION ALL SELECT 'Cartoon' AS table_name, 'Directed_by' AS column_name, CAST(\"Cartoon\".\"Directed_by\" AS TEXT) AS value FROM \"Cartoon\" WHERE \"Cartoon\".\"Directed_by\" IS NOT NULL AND (INSTR(LOWER(CAST(\"Cartoon\".\"Directed_by\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"Cartoon\".\"Directed_by\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"Cartoon\".\"Directed_by\" AS TEXT))) > 0)) GROUP BY \"Cartoon\".\"Directed_by\" UNION ALL SELECT 'Cartoon' AS table_name, 'Original_air_date' AS column_name, CAST(\"Cartoon\".\"Original_air_date\" AS TEXT) AS value FROM \"Cartoon\" WHERE \"Cartoon\".\"Original_air_date\" IS NOT NULL AND (INSTR(LOWER(CAST(\"Cartoon\".\"Original_air_date\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"Cartoon\".\"Original_air_date\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"Cartoon\".\"Original_air_date\" AS TEXT))) > 0)) GROUP BY \"Cartoon\".\"Original_air_date\" UNION ALL SELECT 'Cartoon' AS table_name, 'Channel' AS column_name, CAST(\"Cartoon\".\"Channel\" AS TEXT) AS value FROM \"Cartoon\" WHERE \"Cartoon\".\"Channel\" IS NOT NULL AND (INSTR(LOWER(CAST(\"Cartoon\".\"Channel\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"Cartoon\".\"Channel\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"Cartoon\".\"Channel\" AS TEXT))) > 0)) GROUP BY \"Cartoon\".\"Channel\" UNION ALL SELECT 'TV_Channel' AS table_name, 'id' AS column_name, CAST(\"TV_Channel\".\"id\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"id\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"id\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"id\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"id\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"id\" UNION ALL SELECT 'TV_Channel' AS table_name, 'series_name' AS column_name, CAST(\"TV_Channel\".\"series_name\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"series_name\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"series_name\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"series_name\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"series_name\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"series_name\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Country' AS column_name, CAST(\"TV_Channel\".\"Country\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Country\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Country\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Country\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Country\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Country\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Language' AS column_name, CAST(\"TV_Channel\".\"Language\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Language\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Language\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Language\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Language\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Language\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Content' AS column_name, CAST(\"TV_Channel\".\"Content\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Content\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Content\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Content\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Content\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Content\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Pixel_aspect_ratio_PAR' AS column_name, CAST(\"TV_Channel\".\"Pixel_aspect_ratio_PAR\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Pixel_aspect_ratio_PAR\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Pixel_aspect_ratio_PAR\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Pixel_aspect_ratio_PAR\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Pixel_aspect_ratio_PAR\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Pixel_aspect_ratio_PAR\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Hight_definition_TV' AS column_name, CAST(\"TV_Channel\".\"Hight_definition_TV\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Hight_definition_TV\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Hight_definition_TV\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Hight_definition_TV\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Hight_definition_TV\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Hight_definition_TV\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Pay_per_view_PPV' AS column_name, CAST(\"TV_Channel\".\"Pay_per_view_PPV\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Pay_per_view_PPV\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Pay_per_view_PPV\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Pay_per_view_PPV\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Pay_per_view_PPV\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Pay_per_view_PPV\" UNION ALL SELECT 'TV_Channel' AS table_name, 'Package_Option' AS column_name, CAST(\"TV_Channel\".\"Package_Option\" AS TEXT) AS value FROM \"TV_Channel\" WHERE \"TV_Channel\".\"Package_Option\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_Channel\".\"Package_Option\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_Channel\".\"Package_Option\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_Channel\".\"Package_Option\" AS TEXT))) > 0)) GROUP BY \"TV_Channel\".\"Package_Option\" UNION ALL SELECT 'TV_series' AS table_name, 'Episode' AS column_name, CAST(\"TV_series\".\"Episode\" AS TEXT) AS value FROM \"TV_series\" WHERE \"TV_series\".\"Episode\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_series\".\"Episode\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_series\".\"Episode\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_series\".\"Episode\" AS TEXT))) > 0)) GROUP BY \"TV_series\".\"Episode\" UNION ALL SELECT 'TV_series' AS table_name, 'Air_Date' AS column_name, CAST(\"TV_series\".\"Air_Date\" AS TEXT) AS value FROM \"TV_series\" WHERE \"TV_series\".\"Air_Date\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_series\".\"Air_Date\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_series\".\"Air_Date\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_series\".\"Air_Date\" AS TEXT))) > 0)) GROUP BY \"TV_series\".\"Air_Date\" UNION ALL SELECT 'TV_series' AS table_name, 'Rating' AS column_name, CAST(\"TV_series\".\"Rating\" AS TEXT) AS value FROM \"TV_series\" WHERE \"TV_series\".\"Rating\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_series\".\"Rating\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_series\".\"Rating\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_series\".\"Rating\" AS TEXT))) > 0)) GROUP BY \"TV_series\".\"Rating\" UNION ALL SELECT 'TV_series' AS table_name, '18_49_Rating_Share' AS column_name, CAST(\"TV_series\".\"18_49_Rating_Share\" AS TEXT) AS value FROM \"TV_series\" WHERE \"TV_series\".\"18_49_Rating_Share\" IS NOT NULL AND (INSTR(LOWER(CAST(\"TV_series\".\"18_49_Rating_Share\" AS TEXT)), LOWER('Todd Casey')) > 0 OR (LENGTH(CAST(\"TV_series\".\"18_49_Rating_Share\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that are not playing cartoons written by Todd Casey?'), LOWER(CAST(\"TV_series\".\"18_49_Rating_Share\" AS TEXT))) > 0)) GROUP BY \"TV_series\".\"18_49_Rating_Share\") LIMIT 8",
-          "observation": {
-            "ok": true,
-            "columns": [
-              "table_name",
-              "column_name",
-              "value"
-            ],
-            "rows": [
-              [
-                "Cartoon",
-                "Written_by",
-                "Todd Casey"
-              ]
-            ],
-            "row_count": 1,
-            "truncated": false,
-            "error": null
-          }
-        },
-        {
           "tool": "check",
-          "sql": "SELECT \"TV_Channel\".\"Country\" FROM TV_Channel WHERE Directed_by = 'Todd Casey' AND NOT Channel IS NULL",
-          "observation": {
-            "ok": false,
-            "columns": [],
-            "rows": [],
-            "row_count": 0,
-            "truncated": false,
-            "error": {
-              "type": "OperationalError",
-              "message": "no such column: Directed_by"
-            },
-            "matches_example": false
-          }
-        },
-        {
-          "tool": "check",
-          "sql": "SELECT \"TV_Channel\".\"Country\" FROM \"TV_Channel\" JOIN \"Cartoon\" ON \"TV_Channel\".\"id\" = \"Cartoon\".\"Channel\" WHERE \"Cartoon\".\"Directed_by\" = 'Todd Casey' AND NOT \"Cartoon\".\"Channel\" IS NULL",
+          "sql": "SELECT T1.Country FROM TV_Channel AS T1 EXCEPT SELECT T1.Country FROM TV_Channel AS T1 JOIN Cartoon AS T2 ON T1.id = T2.Channel WHERE T2.Written_by = 'Todd Casey'",
           "observation": {
             "ok": true,
             "columns": [
               "Country"
             ],
-            "rows": [],
-            "row_count": 0,
+            "rows": [
+              [
+                "Italy"
+              ],
+              [
+                "Poland"
+              ]
+            ],
+            "row_count": 2,
             "truncated": false,
             "error": null,
-            "matches_example": false
+            "matches_example": true
           }
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT TV_Channel.Country\nFROM TV_Channel\nJOIN Cartoon ON TV_Channel.id = Cartoon.Channel\nWHERE Cartoon.Written_by != 'Todd Casey';"
+          "sql": "SELECT T1.Country FROM TV_Channel AS T1 EXCEPT SELECT T1.Country FROM TV_Channel AS T1 JOIN Cartoon AS T2 ON T1.id = T2.Channel WHERE T2.Written_by = 'Todd Casey'"
         }
       ],
-      "tool_calls": 8
+      "tool_calls": 6
     },
     {
       "id": "test-e74356f7af3bfc0e",
@@ -25732,7 +25866,7 @@
     },
     {
       "id": "test-2b945f68199483a3",
-      "sql": "SELECT MAX(stadium.Capacity) AS max_capacity, AVG(stadium.Average) AS average\nFROM stadium;",
+      "sql": "SELECT max(capacity) , average FROM stadium",
       "trace": [
         {
           "tool": "check",
@@ -25954,28 +26088,28 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT max(capacity) , avg(stadium.capacity) FROM stadium",
+          "sql": "SELECT max(capacity) , average FROM stadium",
           "observation": {
             "ok": true,
             "columns": [
               "max(capacity)",
-              "avg(stadium.capacity)"
+              "Average"
             ],
             "rows": [
               [
                 10104,
-                4799.4
+                2106
               ]
             ],
             "row_count": 1,
             "truncated": false,
             "error": null,
-            "matches_example": false
+            "matches_example": true
           }
         },
         {
           "tool": "submit",
-          "sql": "SELECT MAX(stadium.Capacity) AS max_capacity, AVG(stadium.Average) AS average\nFROM stadium;"
+          "sql": "SELECT max(capacity) , average FROM stadium"
         }
       ],
       "tool_calls": 5
@@ -28328,7 +28462,7 @@
     },
     {
       "id": "test-cbb4a16977299a25",
-      "sql": "SELECT DISTINCT singer.Name\nFROM singer\nJOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID\nJOIN concert ON singer_in_concert.concert_ID = concert.concert_ID\nWHERE concert.Year = '2014';",
+      "sql": "SELECT singer.Name\nFROM singer\nJOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID\nJOIN concert ON singer_in_concert.concert_ID = concert.concert_ID\nWHERE concert.Year = '2014';",
       "trace": [
         {
           "tool": "check",
@@ -28379,7 +28513,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT singer.Name\nFROM singer\nJOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID\nJOIN concert ON singer_in_concert.concert_ID = concert.concert_ID\nWHERE concert.Year = '2014';"
+          "sql": "SELECT singer.Name\nFROM singer\nJOIN singer_in_concert ON singer.Singer_ID = singer_in_concert.Singer_ID\nJOIN concert ON singer_in_concert.concert_ID = concert.concert_ID\nWHERE concert.Year = '2014';"
         }
       ],
       "tool_calls": 3
@@ -29098,7 +29232,7 @@
     },
     {
       "id": "test-f062e74c848cfdcf",
-      "sql": "SELECT DISTINCT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE T1.ship_type = 'Brig'",
+      "sql": "SELECT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE ship_type = 'Brig'",
       "trace": [
         {
           "tool": "check",
@@ -29323,7 +29457,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT DISTINCT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE T1.ship_type = 'Brig'",
+          "sql": "SELECT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE ship_type = 'Brig'",
           "observation": {
             "ok": true,
             "columns": [
@@ -29352,7 +29486,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT DISTINCT \"id\", \"name\" FROM \"ship\" WHERE \"ship_type\" = 'Brig'",
+          "sql": "SELECT \"id\", \"name\" FROM \"ship\" WHERE \"ship_type\" = 'Brig'",
           "observation": {
             "ok": true,
             "columns": [
@@ -29381,7 +29515,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE T1.ship_type = 'Brig'"
+          "sql": "SELECT T1.id , T1.name FROM ship AS T1 JOIN battle AS T2 ON T1.lost_in_battle = T2.id WHERE ship_type = 'Brig'"
         }
       ],
       "tool_calls": 8
@@ -33686,7 +33820,7 @@
     },
     {
       "id": "test-483d18bc3b130c85",
-      "sql": "SELECT \"stadium\".\"Name\", COUNT(*) FROM stadium INNER JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID GROUP BY stadium.Stadium_ID",
+      "sql": "SELECT T2.name , count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id = T2.stadium_id GROUP BY T1.stadium_id",
       "trace": [
         {
           "tool": "check",
@@ -33982,12 +34116,12 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT \"stadium\".\"Name\", COUNT(*) FROM stadium INNER JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID GROUP BY stadium.Stadium_ID",
+          "sql": "SELECT T2.name , count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id = T2.stadium_id GROUP BY T1.stadium_id",
           "observation": {
             "ok": true,
             "columns": [
               "Name",
-              "COUNT(*)"
+              "count(*)"
             ],
             "rows": [
               [
@@ -34003,7 +34137,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT \"stadium\".\"Name\", COUNT(*) FROM stadium INNER JOIN concert ON stadium.Stadium_ID = concert.Stadium_ID GROUP BY stadium.Stadium_ID"
+          "sql": "SELECT T2.name , count(*) FROM concert AS T1 JOIN stadium AS T2 ON T1.stadium_id = T2.stadium_id GROUP BY T1.stadium_id"
         }
       ],
       "tool_calls": 7
@@ -38691,5 +38825,5 @@
       "tool_calls": 4
     }
   ],
-  "prediction_seconds": 271.51315885799704
+  "prediction_seconds": 404.21657749599945
 }

@@ -2470,7 +2470,7 @@
     },
     {
       "id": "validation-6ff42b00b3afd128",
-      "sql": "SELECT DISTINCT Product_Suppliers.supplier_id FROM Product_Suppliers GROUP BY Product_Suppliers.supplier_id HAVING AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) > 50000 OR AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) < 30000",
+      "sql": "SELECT Product_Suppliers.supplier_id FROM Product_Suppliers GROUP BY Product_Suppliers.supplier_id HAVING AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) > 50000 OR AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) < 30000",
       "trace": [
         {
           "tool": "check",
@@ -3077,11 +3077,36 @@
           }
         },
         {
+          "tool": "check",
+          "sql": "SELECT Product_Suppliers.supplier_id FROM Product_Suppliers GROUP BY Product_Suppliers.supplier_id HAVING AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) > 50000 OR AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) < 30000",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "supplier_id"
+            ],
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ]
+            ],
+            "row_count": 3,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT Product_Suppliers.supplier_id FROM Product_Suppliers GROUP BY Product_Suppliers.supplier_id HAVING AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) > 50000 OR AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) < 30000"
+          "sql": "SELECT Product_Suppliers.supplier_id FROM Product_Suppliers GROUP BY Product_Suppliers.supplier_id HAVING AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) > 50000 OR AVG(CAST(\"Product_Suppliers\".\"total_amount_purchased\" AS REAL)) < 30000"
         }
       ],
-      "tool_calls": 6
+      "tool_calls": 7
     },
     {
       "id": "validation-1b6e5a6dd2d6aa32",
@@ -3396,7 +3421,7 @@
     },
     {
       "id": "validation-ab68d815813fb4b7",
-      "sql": "SELECT DISTINCT editor.Name\nFROM editor\nJOIN journal_committee ON editor.Editor_ID = journal_committee.Editor_ID\nJOIN journal ON journal_committee.Journal_ID = journal.Journal_ID\nWHERE journal.Sales > 3000;",
+      "sql": "SELECT editor.Name\nFROM editor\nJOIN journal_committee ON editor.Editor_ID = journal_committee.Editor_ID\nJOIN journal ON journal_committee.Journal_ID = journal.Journal_ID\nWHERE journal.Sales > 3000;",
       "trace": [
         {
           "tool": "check",
@@ -3447,7 +3472,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT editor.Name\nFROM editor\nJOIN journal_committee ON editor.Editor_ID = journal_committee.Editor_ID\nJOIN journal ON journal_committee.Journal_ID = journal.Journal_ID\nWHERE journal.Sales > 3000;"
+          "sql": "SELECT editor.Name\nFROM editor\nJOIN journal_committee ON editor.Editor_ID = journal_committee.Editor_ID\nJOIN journal ON journal_committee.Journal_ID = journal.Journal_ID\nWHERE journal.Sales > 3000;"
         }
       ],
       "tool_calls": 3
@@ -8072,7 +8097,7 @@
     },
     {
       "id": "validation-5cf3b447b4af02c2",
-      "sql": "SELECT DISTINCT Country FROM competition WHERE NOT EXISTS(SELECT 1 FROM \"competition\" AS \"_neg_category\" WHERE \"_neg_category\".\"Country\" IS NOT DISTINCT FROM \"competition\".\"Country\" AND \"_neg_category\".\"Competition_type\" = 'Friendly')",
+      "sql": "SELECT c.Country\nFROM competition c\nWHERE c.Competition_type = 'friendly'",
       "trace": [
         {
           "tool": "check",
@@ -8367,30 +8392,8 @@
           }
         },
         {
-          "tool": "execute",
-          "sql": "/* value-grounding */ SELECT table_name, column_name, value FROM (SELECT 'competition' AS table_name, 'Competition_type' AS column_name, CAST(\"competition\".\"Competition_type\" AS TEXT) AS value FROM \"competition\" WHERE \"competition\".\"Competition_type\" IS NOT NULL AND (INSTR(LOWER(CAST(\"competition\".\"Competition_type\" AS TEXT)), LOWER('friendly')) > 0 OR (LENGTH(CAST(\"competition\".\"Competition_type\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that have never participated in any friendly-type competitions?'), LOWER(CAST(\"competition\".\"Competition_type\" AS TEXT))) > 0)) GROUP BY \"competition\".\"Competition_type\" UNION ALL SELECT 'competition' AS table_name, 'Country' AS column_name, CAST(\"competition\".\"Country\" AS TEXT) AS value FROM \"competition\" WHERE \"competition\".\"Country\" IS NOT NULL AND (INSTR(LOWER(CAST(\"competition\".\"Country\" AS TEXT)), LOWER('friendly')) > 0 OR (LENGTH(CAST(\"competition\".\"Country\" AS TEXT)) >= 3 AND INSTR(LOWER('What are the countries that have never participated in any friendly-type competitions?'), LOWER(CAST(\"competition\".\"Country\" AS TEXT))) > 0)) GROUP BY \"competition\".\"Country\") LIMIT 8",
-          "observation": {
-            "ok": true,
-            "columns": [
-              "table_name",
-              "column_name",
-              "value"
-            ],
-            "rows": [
-              [
-                "competition",
-                "Competition_type",
-                "Friendly"
-              ]
-            ],
-            "row_count": 1,
-            "truncated": false,
-            "error": null
-          }
-        },
-        {
           "tool": "check",
-          "sql": "SELECT Country FROM competition WHERE Competition_type = 'Friendly'",
+          "sql": "SELECT T1.Country FROM competition AS T1 EXCEPT SELECT c.Country FROM competition AS c WHERE EXISTS(SELECT 1 FROM \"competition\" AS \"_neg_category\" WHERE \"_neg_category\".\"Country\" IS NOT DISTINCT FROM \"c\".\"Country\" AND \"_neg_category\".\"Competition_type\" = 'friendly')",
           "observation": {
             "ok": true,
             "columns": [
@@ -8398,28 +8401,25 @@
             ],
             "rows": [
               [
-                "Italy"
-              ],
-              [
-                "Spain"
-              ],
-              [
-                "Russia"
-              ],
-              [
-                "Russia"
-              ],
-              [
                 "Australia"
               ],
               [
+                "Ireland"
+              ],
+              [
                 "Italy"
               ],
               [
-                "Ireland"
+                "Russia"
+              ],
+              [
+                "Slovenia"
+              ],
+              [
+                "Spain"
               ]
             ],
-            "row_count": 7,
+            "row_count": 6,
             "truncated": false,
             "error": null,
             "matches_example": false
@@ -8427,7 +8427,7 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT DISTINCT Country FROM competition WHERE NOT EXISTS(SELECT 1 FROM \"competition\" AS \"_neg_category\" WHERE \"_neg_category\".\"Country\" IS NOT DISTINCT FROM \"competition\".\"Country\" AND \"_neg_category\".\"Competition_type\" = 'Friendly')",
+          "sql": "SELECT Country FROM competition WHERE Competition_type != 'Friendly'",
           "observation": {
             "ok": true,
             "columns": [
@@ -8436,17 +8436,35 @@
             "rows": [
               [
                 "Slovenia"
+              ],
+              [
+                "Slovenia"
               ]
             ],
-            "row_count": 1,
+            "row_count": 2,
             "truncated": false,
             "error": null,
-            "matches_example": true
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
+          "sql": "SELECT \"competition\".\"Country\" FROM \"competition\" WHERE \"competition\".\"Competition_type\" = 'friendly'",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Country"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": false
           }
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT Country FROM competition WHERE NOT EXISTS(SELECT 1 FROM \"competition\" AS \"_neg_category\" WHERE \"_neg_category\".\"Country\" IS NOT DISTINCT FROM \"competition\".\"Country\" AND \"_neg_category\".\"Competition_type\" = 'Friendly')"
+          "sql": "SELECT c.Country\nFROM competition c\nWHERE c.Competition_type = 'friendly'"
         }
       ],
       "tool_calls": 8
@@ -15450,7 +15468,7 @@
     },
     {
       "id": "validation-741ca93b599363fd",
-      "sql": "SELECT DISTINCT Organizations.organization_name\nFROM Organizations\nWHERE organization_name LIKE '%Party%';",
+      "sql": "SELECT Organizations.organization_name\nFROM Organizations\nWHERE organization_name LIKE '%Party%';",
       "trace": [
         {
           "tool": "check",
@@ -15501,7 +15519,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT Organizations.organization_name\nFROM Organizations\nWHERE organization_name LIKE '%Party%';"
+          "sql": "SELECT Organizations.organization_name\nFROM Organizations\nWHERE organization_name LIKE '%Party%';"
         }
       ],
       "tool_calls": 3
@@ -15740,7 +15758,7 @@
     },
     {
       "id": "validation-4a37f9727ac82a31",
-      "sql": "SELECT DISTINCT channel.Name FROM channel JOIN broadcast ON channel.Channel_ID = broadcast.Channel_ID JOIN broadcast_share ON channel.Channel_ID = broadcast_share.Channel_ID WHERE broadcast.Time_of_day IN ('Morning', 'Night') GROUP BY channel.Channel_ID HAVING COUNT(DISTINCT broadcast.Time_of_day) = 2",
+      "sql": "SELECT channel.Name FROM channel JOIN broadcast ON channel.Channel_ID = broadcast.Channel_ID JOIN broadcast_share ON channel.Channel_ID = broadcast_share.Channel_ID WHERE broadcast.Time_of_day IN ('Morning', 'Night') GROUP BY channel.Channel_ID HAVING COUNT(DISTINCT broadcast.Time_of_day) = 2",
       "trace": [
         {
           "tool": "check",
@@ -15992,11 +16010,26 @@
           }
         },
         {
+          "tool": "check",
+          "sql": "SELECT channel.Name FROM channel JOIN broadcast ON channel.Channel_ID = broadcast.Channel_ID JOIN broadcast_share ON channel.Channel_ID = broadcast_share.Channel_ID WHERE broadcast.Time_of_day IN ('Morning', 'Night') GROUP BY channel.Channel_ID HAVING COUNT(DISTINCT broadcast.Time_of_day) = 2",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Name"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": true
+          }
+        },
+        {
           "tool": "submit",
-          "sql": "SELECT DISTINCT channel.Name FROM channel JOIN broadcast ON channel.Channel_ID = broadcast.Channel_ID JOIN broadcast_share ON channel.Channel_ID = broadcast_share.Channel_ID WHERE broadcast.Time_of_day IN ('Morning', 'Night') GROUP BY channel.Channel_ID HAVING COUNT(DISTINCT broadcast.Time_of_day) = 2"
+          "sql": "SELECT channel.Name FROM channel JOIN broadcast ON channel.Channel_ID = broadcast.Channel_ID JOIN broadcast_share ON channel.Channel_ID = broadcast_share.Channel_ID WHERE broadcast.Time_of_day IN ('Morning', 'Night') GROUP BY channel.Channel_ID HAVING COUNT(DISTINCT broadcast.Time_of_day) = 2"
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "validation-531aa9ff080445d6",
@@ -21325,7 +21358,7 @@
     },
     {
       "id": "validation-024d54bb9d654160",
-      "sql": "SELECT DISTINCT mill.name\nFROM mill\nWHERE mill.name LIKE '%Moulin%';",
+      "sql": "SELECT mill.name\nFROM mill\nWHERE mill.name LIKE '%Moulin%';",
       "trace": [
         {
           "tool": "check",
@@ -21388,7 +21421,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT mill.name\nFROM mill\nWHERE mill.name LIKE '%Moulin%';"
+          "sql": "SELECT mill.name\nFROM mill\nWHERE mill.name LIKE '%Moulin%';"
         }
       ],
       "tool_calls": 3
@@ -22268,7 +22301,7 @@
     },
     {
       "id": "validation-cb8c55ba2b7f46b9",
-      "sql": "SELECT \"Elimination\".\"Elimination_Move\" FROM Elimination JOIN wrestler ON Elimination.Wrestler_ID = wrestler.Wrestler_ID WHERE Team = 'Team Orton'",
+      "sql": "SELECT Elimination_Move FROM Elimination WHERE Team = 'Team Orton'",
       "trace": [
         {
           "tool": "check",
@@ -22449,7 +22482,22 @@
         },
         {
           "tool": "check",
-          "sql": "SELECT \"Elimination\".\"Elimination_Move\" FROM Elimination JOIN wrestler ON Elimination.Wrestler_ID = wrestler.Wrestler_ID WHERE Team = 'Team Orton'",
+          "sql": "SELECT Elimination_Move FROM Elimination WHERE Team = 'Orton'",
+          "observation": {
+            "ok": true,
+            "columns": [
+              "Elimination_Move"
+            ],
+            "rows": [],
+            "row_count": 0,
+            "truncated": false,
+            "error": null,
+            "matches_example": false
+          }
+        },
+        {
+          "tool": "check",
+          "sql": "SELECT Elimination_Move FROM Elimination WHERE Team = 'Team Orton'",
           "observation": {
             "ok": true,
             "columns": [
@@ -22471,10 +22519,10 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT \"Elimination\".\"Elimination_Move\" FROM Elimination JOIN wrestler ON Elimination.Wrestler_ID = wrestler.Wrestler_ID WHERE Team = 'Team Orton'"
+          "sql": "SELECT Elimination_Move FROM Elimination WHERE Team = 'Team Orton'"
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "validation-70b637ea23cc769c",
@@ -22623,7 +22671,7 @@
     },
     {
       "id": "validation-c519bc86fc0f6a9d",
-      "sql": "SELECT DISTINCT Subjects.subject_name\nFROM Subjects;",
+      "sql": "SELECT Subjects.subject_name\nFROM Subjects;",
       "trace": [
         {
           "tool": "check",
@@ -22927,7 +22975,7 @@
         },
         {
           "tool": "submit",
-          "sql": "SELECT DISTINCT Subjects.subject_name\nFROM Subjects;"
+          "sql": "SELECT Subjects.subject_name\nFROM Subjects;"
         }
       ],
       "tool_calls": 4
@@ -23035,5 +23083,5 @@
       "tool_calls": 4
     }
   ],
-  "prediction_seconds": 27.366494942005374
+  "prediction_seconds": 44.87932195400026
 }

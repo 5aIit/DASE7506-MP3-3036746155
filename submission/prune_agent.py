@@ -20,24 +20,29 @@ from submission import _key
 
 
 class FinalVariants:
-    MAX_COMPLETIONS = 4  # course limit is 6 completions per task
+    MAX_COMPLETIONS = 4  # greedy mode; course limit is 6 completions per task
+    BEAMS = 6            # beam mode: one beam call = 6 completions (the course limit)
     LLM_RESERVE = 2      # calls kept for the LLM while nothing matches the example
 
     def __init__(self, base, *, prune_joins=False, like_to_equality=False, drop_distinct=False,
                  count_star=False, semi_join=False, ground_values=False, llm_on_nomatch=False,
-                 llm_on_weak=False, llm_replace_weak=False):
+                 llm_on_weak=False, llm_replace_weak=False, llm_beams=False, llm_early=False,
+                 except_nomatch=False):
         self.base = base
         self.flags = {"prune_joins": prune_joins, "like_to_equality": like_to_equality,
                       "drop_distinct": drop_distinct, "count_star": count_star,
                       "semi_join": semi_join, "ground_values": ground_values,
                       "llm_on_nomatch": llm_on_nomatch, "llm_on_weak": llm_on_weak,
-                      "llm_replace_weak": llm_replace_weak}
+                      "llm_replace_weak": llm_replace_weak, "llm_beams": llm_beams,
+                      "llm_early": llm_early, "except_nomatch": except_nomatch}
         self._reset()
 
     def _reset(self):
         self.incumbent, self.phase, self.queue = None, None, []
         self.llm_purpose, self.llm_calls, self.llm_sources = None, 0, set()
-        self.pre_used, self.pre_active = False, False
+        self.pre_used, self.pre_active, self.early_used = False, False, False
+        self.beam_queue = None
+        self.except_used, self.except_pending = False, False
 
     # ---- proposal construction -------------------------------------------
     def _transforms(self, question, schema):
@@ -162,7 +167,12 @@ class FinalVariants:
         history = obs["history"]
         if self.llm_purpose is None:
             self.llm_purpose = self._llm_trigger(obs)
-        if self.llm_purpose is None or self.llm_calls >= self.MAX_COMPLETIONS or obs["remaining"] <= 0:
+        beam_mode = self.flags["llm_beams"] and self.llm_purpose == "nomatch"
+        if self.llm_purpose is None or obs["remaining"] <= 0:
+            return None
+        if beam_mode and not self._no_match(history):
+            return None
+        if not beam_mode and self.llm_calls >= self.MAX_COMPLETIONS:
             return None
         schema = self._schema(history)
         if schema is None:
@@ -173,6 +183,8 @@ class FinalVariants:
         from llm_generate import generate, schema_consistent
         from llm_prompt import build_messages
         checked = {_key(e["sql"]): e for e in history if e["tool"] == "check"}
+        if self.flags["llm_beams"] and self.llm_purpose == "nomatch":
+            return self._beam_action(obs, schema, checked)
         # Repair the original draft first (the offline-evaluated format), then the
         # newest other checked queries. Generation costs no tool call; a check does,
         # so generated SQL that names unknown tables/columns is dropped unchecked.
@@ -198,6 +210,38 @@ class FinalVariants:
                 return None
         return None
 
+    def _beam_action(self, obs, schema, checked):
+        """No-match mode with beam search: one deterministic beam call on the
+        original draft yields up to BEAMS distinct proposals (all counted as
+        completions); schema-consistent ones are checked in beam order."""
+        from llm_generate import generate_beams, schema_consistent
+        from llm_prompt import build_messages
+        if self.beam_queue is None:
+            src = next((e for e in obs["history"] if e["tool"] == "check"
+                        and e["sql"] == obs["issue_sql"]), None)
+            if src is None:
+                return None
+            messages = build_messages(obs["task"]["question"], schema, src["sql"],
+                                      src["observation"], obs["example"])
+            self.llm_calls += self.BEAMS
+            outs = generate_beams(messages, task_id=obs["task"]["id"], purpose="nomatch-beams",
+                                  beams=self.BEAMS)
+            seen, queue = set(), []
+            for sql, _ in outs:
+                if (sql is None or len(sql.encode()) > 16000 or _key(sql) in seen
+                        or not schema_consistent(sql, schema)):
+                    continue
+                seen.add(_key(sql))
+                queue.append(sql)
+            self.beam_queue = queue
+        while self.beam_queue:
+            sql = self.beam_queue.pop(0)
+            if _key(sql) in checked:
+                continue
+            self.phase = "llm-check"
+            return {"tool": "check", "sql": sql}
+        return None
+
     def _after_llm_check(self, obs):
         last = obs["history"][-1]
         if last["observation"].get("matches_example"):
@@ -209,13 +253,51 @@ class FinalVariants:
             return {"tool": "submit", "sql": self.incumbent}
         return self._llm_action(obs) or {"tool": "submit", "sql": self.incumbent}
 
-    def _should_preempt(self, obs):
-        history = obs["history"]
-        return (self.flags["llm_on_nomatch"] and not self.pre_used
-                and 0 < obs["remaining"] <= self.LLM_RESERVE
-                and any(e["tool"] == "check" for e in history)
+    def _no_match(self, history):
+        return (any(e["tool"] == "check" for e in history)
                 and not any(e["tool"] == "check" and e["observation"].get("matches_example")
                             for e in history))
+
+    def _hints_exhausted(self, obs):
+        """The draft and every distinct parseable hint have been checked."""
+        from submission import _candidate
+        history = obs["history"]
+        hint = next((e for e in history if e["tool"] == "repair_hint"), None)
+        if hint is None or not isinstance(hint["observation"], list):
+            return False
+        checked = {_key(e["sql"]) for e in history if e["tool"] == "check"}
+        keys = {_key(h) for h in (_candidate(t) for t in hint["observation"]) if h}
+        return _key(obs["issue_sql"]) in checked and keys <= checked
+
+    def _except_action(self, obs):
+        """No-match only: spend one call on the top EXCEPT proposal (except_rules)
+        when exactly LLM_RESERVE + 1 calls remain, before the LLM reserve."""
+        if (not self.flags["except_nomatch"] or self.except_used
+                or obs["remaining"] != self.LLM_RESERVE + 1 or not self._no_match(obs["history"])):
+            return None
+        schema = self._schema(obs["history"])
+        if schema is None:
+            return None
+        self.except_used = True
+        from except_rules import except_proposals
+        checked = {_key(e["sql"]) for e in obs["history"] if e["tool"] == "check"}
+        for sql in except_proposals(obs["history"], obs["task"]["question"], schema):
+            if _key(sql) not in checked:
+                return {"tool": "check", "sql": sql}
+        return None
+
+    def _should_preempt(self, obs):
+        history = obs["history"]
+        if not self.flags["llm_on_nomatch"] or obs["remaining"] <= 0 or not self._no_match(history):
+            return False
+        if (self.flags["llm_early"] and not self.early_used and obs["remaining"] >= 2
+                and self._hints_exhausted(obs)):
+            self.early_used = True
+            return True
+        if not self.pre_used and obs["remaining"] <= self.LLM_RESERVE:
+            self.pre_used = True
+            return True
+        return False
 
     def act(self, obs):
         history = obs["history"]
@@ -232,9 +314,18 @@ class FinalVariants:
                 self.pre_active, self.phase = False, None
                 return {"tool": "submit", "sql": last["sql"]}
             self.pre_active, self.phase = False, None
+        if self.except_pending:
+            self.except_pending = False
+            last = history[-1]
+            if last["tool"] == "check" and last["observation"].get("matches_example"):
+                return {"tool": "submit", "sql": last["sql"]}
         if self.incumbent is None:
+            action = self._except_action(obs)
+            if action is not None:
+                self.except_pending = True
+                return action
             if self._should_preempt(obs):
-                self.pre_used, self.pre_active, self.llm_purpose = True, True, "nomatch"
+                self.pre_active, self.llm_purpose = True, "nomatch"
                 action = self._llm_action(obs)
                 if action is not None:
                     return action

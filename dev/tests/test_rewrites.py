@@ -6,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "submission"))
 
 from convention_rules import count_star, drop_distinct, like_to_equality, semi_join  # noqa: E402
 from join_prune import needs_schema, pruned_query  # noqa: E402
+from except_rules import except_queries  # noqa: E402
 
 SCHEMA = [
     {"name": "exhibition", "columns": [{"name": "Exhibition_ID"}, {"name": "Theme"},
@@ -100,6 +101,24 @@ def test_semi_join_for_average():
     assert semi_join("SELECT AVG(loan.amount) FROM customer JOIN loan ON customer.id = loan.cid "
                      "WHERE customer.x = 1", "avg", None) is None
     assert semi_join("SELECT COUNT(*) FROM a JOIN b ON a.id = b.aid", "how many", None) is None
+
+
+def test_except_from_cross_table_negation():
+    schema = [
+        {"name": "acc", "columns": [{"name": "id"}, {"name": "name"}], "foreign_keys": []},
+        {"name": "comp", "columns": [{"name": "acc_id"}, {"name": "browser_id"}],
+         "foreign_keys": [{"table": "acc", "from": "acc_id", "to": "id"},
+                          {"table": "browser", "from": "browser_id", "to": "id"}]},
+        {"name": "browser", "columns": [{"name": "id"}, {"name": "name"}], "foreign_keys": []},
+    ]
+    sql = ("SELECT a.name FROM acc a LEFT JOIN comp c ON a.id = c.acc_id LEFT JOIN browser b "
+           "ON c.browser_id = b.id WHERE b.name != 'Opera'")
+    out = except_queries(sql, "Accelerators not compatible with the browser 'Opera'", schema)
+    assert out and out[0] == ("SELECT T1.name FROM acc AS T1 EXCEPT SELECT T1.name FROM acc AS T1 "
+                              "JOIN comp AS T2 ON T1.id = T2.acc_id JOIN browser AS T3 ON T2.browser_id = T3.id "
+                              "WHERE T3.name = 'Opera'"), out
+    assert except_queries(sql, "Accelerators compatible with Opera", schema) == []  # no negation cue
+    assert except_queries("SELECT a.name FROM acc a WHERE a.name = 'x'", "not x", schema) == []
 
 
 if __name__ == "__main__":

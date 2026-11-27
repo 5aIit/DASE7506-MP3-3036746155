@@ -152,3 +152,35 @@ def generate(messages, *, task_id, purpose, max_new_tokens=256):
         with _LOCK, open(s["log"], "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return extract_sql(raw), raw
+
+
+def generate_beams(messages, *, task_id, purpose, beams=6, max_new_tokens=256):
+    """Deterministic beam search returning `beams` completions (each counts as one
+    completion toward the per-task limit). Returns [(sql_or_None, raw_text), ...]
+    in beam-score order. Beam search uses no random numbers, so results do not
+    depend on a sampling seed."""
+    s = _load()
+    torch, tok, model = s["torch"], s["tok"], s["model"]
+    text = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True,
+                                   enable_thinking=False)
+    enc = tok(text, return_tensors="pt").to(s["device"])
+    started = time.perf_counter()
+    with _LOCK, torch.inference_mode():
+        out = model.generate(**enc, max_new_tokens=min(max_new_tokens, 2048), do_sample=False,
+                             num_beams=beams, num_return_sequences=beams, early_stopping=True,
+                             temperature=None, top_p=None, top_k=None)
+    seconds = round(time.perf_counter() - started, 3)
+    results = []
+    for rank, seq in enumerate(out):
+        new = seq[enc["input_ids"].shape[1]:]
+        new = new[new != tok.pad_token_id]
+        raw = tok.decode(new, skip_special_tokens=True)
+        results.append((extract_sql(raw), raw))
+        if s["log"]:
+            record = {"task_id": task_id, "purpose": purpose, "identity": s["identity"],
+                      "decoding": {"num_beams": beams, "rank": rank}, "prompt": messages,
+                      "generated": raw, "prompt_tokens": int(enc["input_ids"].shape[1]),
+                      "new_tokens": int(new.shape[0]), "seconds": seconds if rank == 0 else 0.0}
+            with _LOCK, open(s["log"], "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return results

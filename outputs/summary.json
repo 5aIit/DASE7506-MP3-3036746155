@@ -1,36 +1,36 @@
 {
  "split": "test",
  "n": 240,
- "correct": 192,
- "accuracy": 80.0,
- "mean_tool_calls": 4.029166666666667,
+ "correct": 198,
+ "accuracy": 82.5,
+ "mean_tool_calls": 4.054166666666666,
  "predict": {
-  "wall_s": 272.08,
-  "peak_rss_kib": 4818364,
-  "user_s": 1015.68,
-  "sys_s": 9.22
+  "wall_s": 404.83,
+  "peak_rss_kib": 4818288,
+  "user_s": 1493.44,
+  "sys_s": 56.0
  },
  "score": {
-  "wall_s": 6.79,
-  "peak_rss_kib": 44156,
-  "user_s": 17.73,
-  "sys_s": 4.63
+  "wall_s": 6.48,
+  "peak_rss_kib": 44672,
+  "user_s": 17.61,
+  "sys_s": 4.34
  },
  "llm": {
-  "completions": 65,
-  "tasks_with_completions": 25,
-  "max_completions_per_task": 4,
-  "prompt_tokens": 22150,
-  "new_tokens": 2132,
-  "max_new_tokens_one_completion": 71,
-  "generation_seconds": 250.4,
+  "completions": 144,
+  "tasks_with_completions": 24,
+  "max_completions_per_task": 6,
+  "prompt_tokens": 49914,
+  "new_tokens": 5136,
+  "max_new_tokens_one_completion": 70,
+  "generation_seconds": 381.8,
   "identity": {
    "base": "Qwen/Qwen3-0.6B",
    "base_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
    "base_weights_sha256": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
    "adapter": {
-    "dir": "/home/wyatt/mp3/export/adapter-v3",
-    "sha256": "9a0cf37229e658a61edde873aa8557458275f97bedc60e069dd3639a360fa665",
+    "dir": "/home/wyatt/mp3/export/adapter-v3-ep1",
+    "sha256": "103ed170ed427977cf391decdca2d23262afa3340ee86813f85f4e391495ca79",
     "config_sha256": "253710337a5466105e95413d55471d20ab19d50e8f51ab3fa6cab1d93810c457"
    }
   }
@@ -50,9 +50,9 @@
   "dtype": "float32"
  },
  "hashes": {
-  "predictions": "b9ebe39f84852ae24e11b8e2660ee886c4064101840e14e3b5368596c433fd01",
-  "score": "aa858be6dee0e821b0053fa552f6bd789baff80aaac1cb2cb77315e40c20a635",
-  "config": "843e8b70eec113f91bcaacc8bec34dc9d129f62e55818ec854a9c2f7a63eecec",
+  "predictions": "f0c190d8bb07be680f2a7d6cf3508ab76b55123f3c5ac72759e09680835ae354",
+  "score": "a6dabdd6bb4214fb25cb5abd11ccf248d6f07f2d2a5750c1a460d2755c786720",
+  "config": "0e6d0b9827f03ea11524ab2ba43f4147ebdda4c4b4239b104afac81ccec82ae3",
   "submission": {
    "absent_relation_rules.py": "3e4560f700fc485febe67cc04bf0103f45aef0bfb529843d22201c406d9d7506",
    "cardinality_rules.py": "fa9496b0fb31117834973aa4cafc5a9595208b1219529f5facf1123fa6e23eaf",
@@ -60,6 +60,7 @@
    "convention_rules.py": "9a81358c5a2517dab304c21e13206ebd2081427236cfc8d9de51d2d602d4882b",
    "count_rules.py": "c757de158e6686527f96d05f455d45ddecbbc1c66008787ec34e6ab1c5e33599",
    "entity_rules.py": "3881ed5abfabcad51ad8e61caf5bb59b43559547bd1d531ba1e3cccb4cb3c1a0",
+   "except_rules.py": "389f2a30443d7ef0293fa8e33a9ff316b73af2ea3d2650e3c32bc6b08dbb0538",
    "extreme_rules.py": "377c8b29d0fe3903370c7e80dbc7d3a0a22f5213c5d036c9db4f8331d7753d20",
    "filter_rules.py": "3e12f695a0cd4d304d91688c15c44d96b69fd6032d22e92af3902e5859c6d616",
    "final_checks.py": "ac34015003e814f87597f66504abc11918b289a960ba74edd8c36eb392600603",
@@ -67,14 +68,14 @@
    "header_repair.py": "41dca75ca758605b32cc2aff888a0dbc114bbf3d82c1bfd1e46c28a4f4130cdd",
    "join_prune.py": "d42751080c52eed363b9adaacef3f38c99ffaee06f0bf07d99481fbb5f495ef8",
    "lexical_rules.py": "7101293fc43981963fe9f34a8c3c7094415ea4f32b126947035d7d6b3662c766",
-   "llm_generate.py": "4dbae451979eb1fd991ccf6cb4ae501abd104372a1142edb10bec45809a00041",
+   "llm_generate.py": "c6792c82058ef84a6116b79b56ea7f50c9403b64a91d06c7c14a34af5bfce29f",
    "llm_prompt.py": "95197f1ed1df7fca3bc422d4d9a801e81b26034565e3f59b24c03288e9045135",
    "negation_rules.py": "e83930fd7dbec4b0e10af8ce2c16ab54221a482568d284e7b60f5f2d90202dfa",
-   "prune_agent.py": "2389a1b3f75662e5b03bcd4614959047e7efa330445e4670576fa149fa6e96cd",
+   "prune_agent.py": "1bc0aefffbec07094f3b99abc239c71f30691cc7462e13cd455ad690cfa03ea5",
    "relation_rules.py": "a1ee9f4bb9b87f75ecbcf11ccbd149e5f45e64be12fe0b12c65f4d68804a5da6",
    "repair_rules.py": "2d6ba234648d8f7d77ac1773b26e4be6f3efec7a12cc9c3e06eea20370765e42",
    "rescue.py": "b42c7a011c8456a27b9cc15340d8e0fa593212627783134a1cc93cfd0bb9fb54",
-   "rule_agent.py": "c28504707ccd57c68c5b9b9b69d3c63b85fe718c593d55ba2a3ae0eca8389820",
+   "rule_agent.py": "4d4527a93c9d9f511ed0772dff88ecaf44b10da1a1e7ffb9c8a5609d5299620c",
    "semantic_rules.py": "855efbc7ea99de7e365d482a3b26fe1791945ca0cd1ff607006186456aab47cd",
    "set_rules.py": "033473f8fa3210170118c5ee94599cb7b93ee715ec4d12dddb32e3a4a5269340",
    "simplification_rules.py": "8b5d70b456701aefe8763e728fb2d459340e07a4def66265d678d4db83779f41",
@@ -87,6 +88,6 @@
   },
   "package_manifest": "85b645ee9413c36d215253544fd0657679b9e66175b304ee24a386ddeca762a1"
  },
- "git_commit": "01c5481478b65e23e4ea6a2b453a3b1091b12e52",
+ "git_commit": "c56be5e5871c59784cc0a5721b29620f857d8dd9",
  "git_dirty": true
 }

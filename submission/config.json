@@ -24,5 +24,8 @@
   "audit_relational_intent": true,
   "prune_joins": true,
   "semi_join": true,
-  "llm_on_nomatch": true
+  "llm_on_nomatch": true,
+  "llm_beams": true,
+  "except_nomatch": true,
+  "drop_distinct": true
 }

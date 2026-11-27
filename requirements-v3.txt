@@ -1,4 +1,4 @@
-# Exact environment of the v2 test run: Python 3.11.18, Linux x86_64.
+# Exact environment of the v3 test run: Python 3.11.18, Linux x86_64.
 # torch is the CPU wheel: pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
 Jinja2==3.1.6
 MarkupSafe==3.0.3

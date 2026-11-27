@@ -3,7 +3,7 @@
   "n": 120,
   "correct": 112,
   "accuracy": 93.33333333333333,
-  "mean_tool_calls": 4.008333333333334,
+  "mean_tool_calls": 4.033333333333333,
   "per_question": [
     {
       "id": "validation-3c4d5ecbd3a4ffc8",
@@ -288,7 +288,7 @@
           "error": null
         }
       ],
-      "tool_calls": 6
+      "tool_calls": 7
     },
     {
       "id": "validation-1b6e5a6dd2d6aa32",
@@ -330,14 +330,14 @@
     },
     {
       "id": "validation-ab68d815813fb4b7",
-      "passed": false,
+      "passed": true,
       "cases": [
         {
           "passed": true,
           "error": null
         },
         {
-          "passed": false,
+          "passed": true,
           "error": null
         },
         {
@@ -805,18 +805,18 @@
     },
     {
       "id": "validation-5cf3b447b4af02c2",
-      "passed": true,
+      "passed": false,
       "cases": [
         {
-          "passed": true,
+          "passed": false,
           "error": null
         },
         {
-          "passed": true,
+          "passed": false,
           "error": null
         },
         {
-          "passed": true,
+          "passed": false,
           "error": null
         }
       ],
@@ -1656,7 +1656,7 @@
           "error": null
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "validation-531aa9ff080445d6",
@@ -2226,7 +2226,7 @@
           "error": null
         }
       ],
-      "tool_calls": 7
+      "tool_calls": 8
     },
     {
       "id": "validation-70b637ea23cc769c",
@@ -2293,6 +2293,6 @@
   "references_sha256": "5bfdd63ca75dd6b58c4ae3a7c72227ecfe0315655721ecaaef8e412ec3d6521d",
   "scorer_sha256": "87870af26173fbe6d8994e4de179fb272ef1fadf7dcaafc2e7b4c814c61ec95b",
   "executor_sha256": "4ecc3839728d68bd83f0d2a52cdd8392fd76dbaec3e54a19422118dee587b471",
-  "predictions_sha256": "e4becb4a7729ff5d01b4912bb32e8d1ed9e12493feeb21ff31011862ccbbcc20",
-  "scoring_seconds": 3.1825285180093488
+  "predictions_sha256": "bff0cf88598de07d04cb6809b1e333dbc3c2f0104357ac1c5b7bb892b32c6d20",
+  "scoring_seconds": 3.177387945999726
 }

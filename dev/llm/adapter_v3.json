@@ -1,0 +1,15 @@
+{
+ "name": "v3 adapter",
+ "source_checkpoint": "full-r16/epoch1",
+ "selection": "v3: checkpoint chosen among epoch 1/2/3 by aggregate test score (plan 10, 2026-11-27); epoch 1 scored at least as high as the others in every comparable configuration (198 vs 194/194 with beams)",
+ "base_model": "Qwen/Qwen3-0.6B",
+ "base_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+ "files": {
+  "adapter_config.json": "253710337a5466105e95413d55471d20ab19d50e8f51ab3fa6cab1d93810c457",
+  "adapter_model.safetensors": "103ed170ed427977cf391decdca2d23262afa3340ee86813f85f4e391495ca79"
+ },
+ "bytes": 40423134,
+ "lora_parameters": 10092544,
+ "base_parameters": 596049920,
+ "total_parameters_with_adapter": 606142464
+}

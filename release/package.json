@@ -1,0 +1,26 @@
+{
+ "source_zip": {
+  "files": 113,
+  "uncompressed_bytes": 3288455,
+  "bytes": 476485,
+  "sha256": "8ea4ec6f011eff14357c8daa989b6486ce866bbdc3bdd7775c5545b5f6b82655"
+ },
+ "adapter_zip": {
+  "files": [
+   "adapter_model.safetensors",
+   "adapter_config.json"
+  ],
+  "bytes": 40423396,
+  "sha256": "cf6b94f8ae37accceaefd2f2c242b55f28b6d67ed4f15a5b67d666da2938cc9d",
+  "member_sha256": {
+   "adapter_model.safetensors": "103ed170ed427977cf391decdca2d23262afa3340ee86813f85f4e391495ca79",
+   "adapter_config.json": "253710337a5466105e95413d55471d20ab19d50e8f51ab3fa6cab1d93810c457"
+  }
+ },
+ "test_result": {
+  "correct": 198,
+  "n": 240,
+  "accuracy": 82.5
+ },
+ "git_commit_of_test_run": "c56be5e5871c59784cc0a5721b29620f857d8dd9"
+}

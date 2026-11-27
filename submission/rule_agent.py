@@ -33,7 +33,12 @@ class RemainingChecks:
 
 # Switches added after v1; all default to off so v1 behaviour is unchanged.
 V2_SWITCHES = ("prune_joins", "like_to_equality", "drop_distinct", "count_star", "semi_join",
-               "ground_values", "llm_on_nomatch", "llm_on_weak", "llm_replace_weak")
+               "ground_values", "llm_on_nomatch", "llm_on_weak", "llm_replace_weak",
+               "llm_beams", "llm_early", "except_nomatch")
+
+
+# Optional integer settings of the LLM proposer (defaults = the v2 submission).
+LLM_LIMITS = {"llm_reserve": ("LLM_RESERVE", 2, 1, 4), "max_completions": ("MAX_COMPLETIONS", 4, 1, 6)}
 
 
 def create_agent(checkpoint=None):
@@ -41,8 +46,16 @@ def create_agent(checkpoint=None):
     switches = {key: config.pop(key, False) for key in V2_SWITCHES}
     if any(type(v) is not bool for v in switches.values()):
         raise ValueError("Strategy JSON accepts only boolean feature switches")
+    limits = {}
+    for key, (attr, default, low, high) in LLM_LIMITS.items():
+        value = config.pop(key, default)
+        if type(value) is not int or not low <= value <= high:
+            raise ValueError(f"{key} must be an integer in [{low}, {high}]")
+        limits[attr] = value
     agent = RemainingChecks(build_agent(config, checked=checkpoint is not None))
     if any(switches.values()):
         from prune_agent import FinalVariants
         agent = FinalVariants(agent, **switches)
+        for attr, value in limits.items():
+            setattr(agent, attr, value)
     return agent

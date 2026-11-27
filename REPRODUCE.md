@@ -1,7 +1,7 @@
-# Reproducing the v2 result (192 / 240 on test)
+# Reproducing the v3 result (198 / 240 on test)
 
 Everything runs offline on Linux x86_64 with 4 CPU threads. No GPU is needed for prediction.
-Measured on Ubuntu 24.04 (WSL2), Python 3.11.18, SQLite 3.53.1: prediction 272 s and 4.8 GB peak RSS; scoring 7 s.
+Measured on Ubuntu 24.04 (WSL2), Python 3.11.18, SQLite 3.53.1: prediction 405 s and 4.8 GB peak RSS; scoring 6 s.
 
 ## 0. Inputs
 
@@ -9,8 +9,8 @@ Measured on Ubuntu 24.04 (WSL2), Python 3.11.18, SQLite 3.53.1: prediction 272 s
 |---|---|
 | official package | `MP3_SQL_student_package.zip`, sha256 `406d69507ccf955a53b35db1c1368bd7452565ebd928b47d0f6161fe35b99a61` |
 | base model | `Qwen/Qwen3-0.6B`, revision `c1899de289a04d12100db370d81485cdf75e47ca` (`model.safetensors` sha256 `f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b`) |
-| adapter ZIP | `adapter_model.safetensors` sha256 `9a0cf37229e658a61edde873aa8557458275f97bedc60e069dd3639a360fa665`, `adapter_config.json` sha256 `253710337a5466105e95413d55471d20ab19d50e8f51ab3fa6cab1d93810c457` |
-| this source ZIP | `submission/` (agent export), `submission/config.json` (v2), `outputs/` (our results) |
+| adapter ZIP | `adapter_model.safetensors` sha256 `103ed170ed427977cf391decdca2d23262afa3340ee86813f85f4e391495ca79`, `adapter_config.json` sha256 `253710337a5466105e95413d55471d20ab19d50e8f51ab3fa6cab1d93810c457` |
+| this source ZIP | `submission/` (agent export), `submission/config.json` (v3), `outputs/` (our results) |
 
 ## 1. Environment (from the official package's top-level directory)
 
@@ -24,22 +24,22 @@ python -m pip install transformers==4.53.2 peft==0.17.1 accelerate==1.10.1 \
 python -m mp3_sql.check_data
 ```
 
-`requirements-v2.txt` in this ZIP lists the complete package set of our run.
+`requirements-v3.txt` in this ZIP lists the complete package set of our run.
 
 ## 2. Base model and adapter (one-time, needs network)
 
 ```bash
 huggingface-cli download Qwen/Qwen3-0.6B --revision c1899de289a04d12100db370d81485cdf75e47ca \
   --local-dir $HOME/models/Qwen3-0.6B
-mkdir -p $HOME/adapter-v2 && unzip MP3_adapter_v2.zip -d $HOME/adapter-v2   # the 2 adapter files
-SRC=/path/to/unzipped/MP3_source_v2                                          # this ZIP
+mkdir -p $HOME/adapter-v3 && unzip MP3_adapter_v3.zip -d $HOME/adapter-v3   # the 2 adapter files
+SRC=/path/to/unzipped/MP3_source_v3                                          # this ZIP
 ```
 
 ## 3. Prediction and scoring (offline)
 
 ```bash
 export MP3_BASE_MODEL=$HOME/models/Qwen3-0.6B
-export MP3_ADAPTER_DIR=$HOME/adapter-v2
+export MP3_ADAPTER_DIR=$HOME/adapter-v3
 export MP3_LLM_LOG=$PWD/outputs/llm_completions.jsonl    # every completion is logged here
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OMP_NUM_THREADS=4
 mkdir -p outputs
@@ -49,8 +49,8 @@ PYTHONPATH="$SRC/submission" taskset -c 0-3 python -m mp3_sql.predict --split te
 python -m mp3_sql.score --split test --predictions outputs/test.json --output outputs/test-score.json
 ```
 
-Expected result: `"correct": 192, "n": 240, "accuracy": 80.0`. Decoding is greedy, so the run is deterministic. The predictions match `outputs/test.json` in this ZIP apart from the `prediction_seconds` field; `outputs/reproduction.json` records our own clean-room rerun from the release ZIPs (made when this version was still labelled v3; same code, configuration and adapter).
-Use `--split validation` for a quick check (about 30 s; expected 112 / 120).
+Expected result: `"correct": 198, "n": 240, "accuracy": 82.5`. Decoding is greedy, so the run is deterministic. The predictions match `outputs/test.json` in this ZIP apart from the `prediction_seconds` field; `outputs/reproduction.json` records our own clean-room rerun from the release ZIPs.
+Use `--split validation` for a quick check (about 45 s; expected 112 / 120).
 
 ## 4. No-LLM variant (ablation; 180 s / 2 GiB route)
 

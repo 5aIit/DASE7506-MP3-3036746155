@@ -3,9 +3,9 @@
  "python": "3.11.18",
  "sqlite": "3.53.1",
  "result": {
-  "correct": 192,
+  "correct": 198,
   "n": 240,
-  "accuracy": 80.0,
+  "accuracy": 82.5,
   "manifest_sha256": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc",
   "bank_sha256": "598b1a072a47cdcf7308dc5646ae2bffd356390ab8df533510b69f2c884d712c",
   "references_sha256": "8be5f2746ee324d6b4b880dd84a2f8de56fa540af08e93842c0476adec581506",
@@ -13,9 +13,9 @@
   "executor_sha256": "4ecc3839728d68bd83f0d2a52cdd8392fd76dbaec3e54a19422118dee587b471"
  },
  "submitted_result": {
-  "correct": 192,
+  "correct": 198,
   "n": 240,
-  "accuracy": 80.0,
+  "accuracy": 82.5,
   "manifest_sha256": "bf7a517249ebe31b9cad8cbf5d6598fde98316d89f9aa1172cae3ad83289a6bc",
   "bank_sha256": "598b1a072a47cdcf7308dc5646ae2bffd356390ab8df533510b69f2c884d712c",
   "references_sha256": "8be5f2746ee324d6b4b880dd84a2f8de56fa540af08e93842c0476adec581506",
@@ -24,7 +24,7 @@
  },
  "predictions_identical_except_timing": true,
  "per_question_outcomes_identical": true,
- "llm_completions": 65,
- "prediction_wall_s": 278,
+ "llm_completions": 144,
+ "prediction_wall_s": 423,
  "scoring_wall_s": 7
 }
